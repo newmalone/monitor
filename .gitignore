@@ -1,0 +1,14 @@
+node_modules/
+dist/
+server/data/
+server/data_agent/
+server/db_agent.json
+*.log
+.vscode/
+.DS_Store
+_report_extract/
+architecture-diagram.html
+generate-diagram.mjs
+*.docx
+*.xlsx
+ai-agent-architecture.png
