@@ -1,0 +1,92 @@
+[
+  {
+    "id": "doc_94c8e2b5",
+    "type": "doc",
+    "content": {
+      "documentation": "设备状态说明：\n- \"在线\" 表示设备当前处于正常连接状态，可正常使用\n- \"离线\" 表示设备当前处于断开连接状态，无法正常工作\n- \"异常\" 或 \"故障\" 表示设备存在问题需要维护\n- \"未启用\" 表示该设备已登记但未启用服务\n- 状态字段：status\n- 启用状态字段：enabled\n- 在线率公式：ROUND(COUNT(CASE WHEN status LIKE '%在线%' THEN 1 END)*100.0/COUNT(*),2)\n"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  },
+  {
+    "id": "doc_3b379078",
+    "type": "doc",
+    "content": {
+      "documentation": "设备标识和计数说明：\n- device_code 是设备的唯一编码标识\n- 统计设备数量时使用 COUNT(DISTINCT device_code) 去重\n- 同一设备在不同日期的快照中有多条记录，必须过滤到最新 snapshot_date\n- 获取最新快照日期：(SELECT MAX(snapshot_date) FROM devices)\n"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  },
+  {
+    "id": "doc_77ec8b22",
+    "type": "doc",
+    "content": {
+      "documentation": "区域和厂商说明：\n- region 字段存储设备所属区域（如：朝阳区、海淀区、丰台区、通州区、大兴区）\n- manufacturer_name 字段存储厂商名称（如：海康威视、大华、宇视、华为等）\n- 区域查询时：region LIKE '%朝阳%' 用于模糊匹配\n- 厂商查询时：manufacturer_name LIKE '%海康%'\n- 两者都是分组统计的核心维度（GROUP BY region / GROUP BY manufacturer_name）\n"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  },
+  {
+    "id": "doc_2dc37410",
+    "type": "doc",
+    "content": {
+      "documentation": "时间趋势分析说明：\n- devices 表按 snapshot_date 存储每日快照（YYYY-MM-DD 格式）\n- snapshots 表记录每日导入的汇总信息\n- 查询近N天趋势时：snapshot_date >= date('now','-N days')\n- 在线率趋势需要按日期 GROUP BY\n"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  },
+  {
+    "id": "doc_b916687c",
+    "type": "doc",
+    "content": {
+      "documentation": "网络延迟表说明：\n- latency_reports 表存储网络质量检测数据\n- 主要指标：avg_latency_ms（平均延迟，毫秒）、max_latency_ms（最大延迟）、packet_loss_rate（丢包率，0-1之间）\n- report_date 为报告日期，device_code 关联设备编码，region 关联区域\n- 较高的延迟和丢包率表明存在网络问题\n"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  },
+  {
+    "id": "doc_0c1333ef",
+    "type": "doc",
+    "content": {
+      "documentation": "【设备监控系统业务说明】\n\n本系统是智能运维管理系统，用于监控和管理全市的物联网设备。\n\n核心数据表：\n- devices 表：存储设备快照信息，每天一条快照记录\n- snapshots 表：快照记录表，记录每次导入的快照信息\n- latency_reports 表：网络延迟报告表，记录设备网络质量检测结果\n\n设备状态说明：\n- 在线：设备正常运行，网络连通\n- 离线：设备不在线，网络不可达\n- 异常：设备状态异常，需要排查\n\n区域说明：\n系统覆盖无锡市各个行政区，包括：惠山区、新吴区、梁溪区、滨湖区、经开区、锡山区\n\n厂商说明：\n主要设备厂商包括：万集、中信科、博世、天安、星云互联、海康、移动、米文动力、航天大为\n\n设备类型说明：\n主要设备类型包括：MEC、毫米波雷达、RSU、路侧监控摄像头、雷视一体机、车内后视镜、激光雷达\n\n查询注意事项：\n1. 查询设备数据时必须指定 snapshot_date 条件\n2. 查询最新数据使用：snapshot_date = (SELECT MAX(snapshot_date) FROM devices)\n3. 所有统计查询默认使用最新快照日期\n4. 区域和厂商字段可能为空，统计时建议过滤空值"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  },
+  {
+    "id": "doc_72315149",
+    "type": "doc",
+    "content": {
+      "documentation": "【devices 表字段说明】\n\n设备表核心字段：\n- id: 设备唯一标识\n- device_code: 设备编码\n- product_name: 产品名称\n- manufacturer_code: 厂商编码\n- manufacturer_name: 厂商名称\n- device_type_code: 设备类型编码\n- device_type_name: 设备类型名称\n- node_type: 节点类型\n- status: 设备状态（在线/离线/异常）\n- region: 所属区域\n- location: 具体位置\n- ip_address: IP 地址\n- maintenance_unit: 维护单位\n- snapshot_date: 快照日期（必填，用于区分不同时间的数据）\n- junction_id: 关联路口ID\n- junction_type: 路口类型\n- junction_level: 路口等级\n- longitude: 经度\n- latitude: 纬度\n\n【snapshots 表字段说明】\n- id: 自增主键\n- date: 快照日期\n- source_file: 来源文件\n- imported_at: 导入时间\n- total_count: 设备总数\n- enabled_count: 启用设备数\n\n【latency_reports 表字段说明】\n- id: 自增主键\n- device_code: 设备编码\n- device_name: 设备名称\n- region: 所属区域\n- report_date: 报告日期\n- avg_latency_ms: 平均延迟（毫秒）\n- max_latency_ms: 最大延迟（毫秒）\n- min_latency_ms: 最小延迟（毫秒）\n- packet_loss_rate: 丢包率\n- total_checks: 总检测次数\n- online_count: 在线次数\n- offline_count: 离线次数"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  },
+  {
+    "id": "doc_8982ddb8",
+    "type": "doc",
+    "content": {
+      "documentation": "【SQL 查询技巧与最佳实践】\n\n1. 最新数据查询\n要查询最新的设备快照数据，使用：\nWHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices)\n\n2. 时间范围查询\n查询最近N天的数据：\nWHERE snapshot_date >= date('2026-06-16', '-6 days')\n\n3. 空值处理\n统计区域/厂商时，建议过滤空值：\nWHERE region IS NOT NULL AND region != ''\n\n4. 在线率计算\n在线率 = 在线设备数 / 总设备数 * 100\n使用 ROUND() 函数保留两位小数：\nROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2)\n\n5. 分组统计\n使用 GROUP BY 进行分组，配合 ORDER BY 排序：\nGROUP BY region ORDER BY count DESC\n\n6. TOP N 查询\n使用 LIMIT 关键字获取前N条记录：\nORDER BY count DESC LIMIT 5\n\n7. 模糊查询\n使用 LIKE 进行模糊匹配：\nWHERE manufacturer_name LIKE '%海康%'\nWHERE device_type_name LIKE '%摄像头%'"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  },
+  {
+    "id": "doc_907ab8c9",
+    "type": "doc",
+    "content": {
+      "documentation": "【常见问题 FAQ】\n\nQ: 为什么查询不到数据？\nA: 请检查是否指定了正确的 snapshot_date。设备表是快照表，每条记录都有快照日期，必须指定日期才能查询到数据。\n\nQ: 如何获取最新的设备数据？\nA: 使用 snapshot_date = (SELECT MAX(snapshot_date) FROM devices) 来获取最新快照的数据。\n\nQ: 设备状态有哪几种？\nA: 设备状态有三种：在线、离线、异常。\n- 在线表示设备正常运行\n- 离线表示设备网络不可达\n- 异常表示设备运行异常\n\nQ: 如何计算在线率？\nA: 在线率 = 在线设备数量 / 总设备数量 × 100%\nSQL示例：SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) FROM devices WHERE snapshot_date = '...'\n\nQ: 支持哪些区域？\nA: 支持无锡市所有行政区，包括：惠山区、新吴区、梁溪区、滨湖区、经开区、锡山区\n\nQ: 支持哪些设备厂商？\nA: 主要设备厂商包括：万集、中信科、博世、天安、星云互联、海康、移动、米文动力、航天大为\n\nQ: 为什么统计结果和预期不一致？\nA: 可能是因为部分设备的区域/厂商字段为空，统计时需要考虑是否包含空值数据。"
+    },
+    "metadata": {
+      "type": "doc"
+    }
+  }
+]
