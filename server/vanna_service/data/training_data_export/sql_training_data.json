@@ -1,0 +1,2477 @@
+[
+  {
+    "id": "sql_a0255f43",
+    "type": "sql",
+    "content": {
+      "question": "今天的设备总数",
+      "sql": "SELECT COUNT(DISTINCT device_code) AS total FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices)"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_bc91357a",
+    "type": "sql",
+    "content": {
+      "question": "最新快照有多少台设备",
+      "sql": "SELECT COUNT(*) AS device_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices)"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_edab4fde",
+    "type": "sql",
+    "content": {
+      "question": "当前设备在线率是多少？",
+      "sql": "SELECT ROUND(COUNT(CASE WHEN status LIKE '%在线%' THEN 1 END)*100.0/COUNT(*),2) AS online_rate, COUNT(*) AS total, COUNT(CASE WHEN status LIKE '%在线%' THEN 1 END) AS online FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices)"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_68c106f7",
+    "type": "sql",
+    "content": {
+      "question": "在线设备有多少台？",
+      "sql": "SELECT COUNT(DISTINCT device_code) AS online_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND status LIKE '%在线%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9667a860",
+    "type": "sql",
+    "content": {
+      "question": "离线设备有多少台？",
+      "sql": "SELECT COUNT(DISTINCT device_code) AS offline_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND status LIKE '%离线%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_64e655de",
+    "type": "sql",
+    "content": {
+      "question": "按状态统计设备数量",
+      "sql": "SELECT status, COUNT(DISTINCT device_code) AS count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) GROUP BY status ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_e04bcbc1",
+    "type": "sql",
+    "content": {
+      "question": "朝阳区有多少台设备？",
+      "sql": "SELECT COUNT(DISTINCT device_code) AS chaoyang_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND region LIKE '%朝阳%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9db05c19",
+    "type": "sql",
+    "content": {
+      "question": "各区域设备在线率对比",
+      "sql": "SELECT region, ROUND(COUNT(CASE WHEN status LIKE '%在线%' THEN 1 END)*100.0/COUNT(*),2) AS online_rate, COUNT(*) AS total FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND region IS NOT NULL AND region != '' GROUP BY region ORDER BY online_rate DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c5d76997",
+    "type": "sql",
+    "content": {
+      "question": "设备数量最多的区域 TOP5",
+      "sql": "SELECT region, COUNT(DISTINCT device_code) AS device_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND region IS NOT NULL AND region != '' GROUP BY region ORDER BY device_count DESC LIMIT 5"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ea5c0f65",
+    "type": "sql",
+    "content": {
+      "question": "哪个区域离线设备最多？",
+      "sql": "SELECT region, COUNT(DISTINCT device_code) AS offline_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND region IS NOT NULL AND region != '' AND status LIKE '%离线%' GROUP BY region ORDER BY offline_count DESC LIMIT 5"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_397d019f",
+    "type": "sql",
+    "content": {
+      "question": "各厂商设备数量对比",
+      "sql": "SELECT manufacturer_name, COUNT(DISTINCT device_code) AS device_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND manufacturer_name IS NOT NULL AND manufacturer_name != '' GROUP BY manufacturer_name ORDER BY device_count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_41ad5e5d",
+    "type": "sql",
+    "content": {
+      "question": "大华设备有多少台？",
+      "sql": "SELECT COUNT(DISTINCT device_code) AS dahua_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND manufacturer_name LIKE '%大华%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ee647393",
+    "type": "sql",
+    "content": {
+      "question": "摄像机设备有多少台？",
+      "sql": "SELECT COUNT(DISTINCT device_code) AS camera_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND (device_type_name LIKE '%摄像%' OR device_type_name LIKE '%相机%')"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_1da1ec9e",
+    "type": "sql",
+    "content": {
+      "question": "近7天的设备总数变化趋势",
+      "sql": "SELECT date, total_count FROM snapshots ORDER BY date DESC LIMIT 7"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_cbbe5960",
+    "type": "sql",
+    "content": {
+      "question": "最近30天在线率变化趋势",
+      "sql": "SELECT d.snapshot_date, ROUND(COUNT(CASE WHEN d.status LIKE '%在线%' THEN 1 END)*100.0/COUNT(*),2) AS online_rate FROM devices d WHERE d.snapshot_date >= date('now','-30 days') GROUP BY d.snapshot_date ORDER BY d.snapshot_date"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_491f7e50",
+    "type": "sql",
+    "content": {
+      "question": "各快照日的设备导入数量",
+      "sql": "SELECT date, total_count, enabled_count FROM snapshots ORDER BY date DESC LIMIT 10"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_0d62dc85",
+    "type": "sql",
+    "content": {
+      "question": "列出异常设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, region, status FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND (status LIKE '%异常%' OR status LIKE '%故障%') ORDER BY device_code"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_4c214efd",
+    "type": "sql",
+    "content": {
+      "question": "未启用的设备有哪些？",
+      "sql": "SELECT device_code, product_name, manufacturer_name, region, status, enabled FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND (enabled LIKE '%否%' OR enabled LIKE '%未启用%') ORDER BY device_code"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_e23606d3",
+    "type": "sql",
+    "content": {
+      "question": "各区域各厂商的设备分布",
+      "sql": "SELECT region, manufacturer_name, COUNT(DISTINCT device_code) AS device_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND region IS NOT NULL AND region != '' AND manufacturer_name IS NOT NULL AND manufacturer_name != '' GROUP BY region, manufacturer_name ORDER BY region, device_count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_574ee4f3",
+    "type": "sql",
+    "content": {
+      "question": "设备状态分布饼图",
+      "sql": "SELECT status, COUNT(DISTINCT device_code) AS device_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) GROUP BY status ORDER BY device_count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_262f0203",
+    "type": "sql",
+    "content": {
+      "question": "各区域的离线设备统计",
+      "sql": "SELECT region, COUNT(DISTINCT device_code) AS offline_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND region IS NOT NULL AND region != '' AND status LIKE '%离线%' GROUP BY region ORDER BY offline_count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_57b12a67",
+    "type": "sql",
+    "content": {
+      "question": "各厂商的在线率对比",
+      "sql": "SELECT manufacturer_name, ROUND(COUNT(CASE WHEN status LIKE '%在线%' THEN 1 END)*100.0/COUNT(*),2) AS online_rate, COUNT(*) AS total FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND manufacturer_name IS NOT NULL AND manufacturer_name != '' GROUP BY manufacturer_name ORDER BY online_rate DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_bd911bb4",
+    "type": "sql",
+    "content": {
+      "question": "有多少个IP地址已登记？",
+      "sql": "SELECT COUNT(DISTINCT ip_address) AS ip_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND ip_address IS NOT NULL AND ip_address != ''"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_0a797e7e",
+    "type": "sql",
+    "content": {
+      "question": "哪些维护单位负责的设备最多？",
+      "sql": "SELECT maintenance_unit, COUNT(DISTINCT device_code) AS device_count FROM devices WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM devices) AND maintenance_unit IS NOT NULL AND maintenance_unit != '' GROUP BY maintenance_unit ORDER BY device_count DESC LIMIT 10"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_8f30f6d3",
+    "type": "sql",
+    "content": {
+      "question": "各区域平均延迟",
+      "sql": "SELECT region, ROUND(AVG(avg_latency_ms),2) AS avg_latency, ROUND(AVG(packet_loss_rate),4) AS avg_loss, COUNT(*) AS device_count FROM latency_reports WHERE report_date = (SELECT MAX(report_date) FROM latency_reports) AND region IS NOT NULL AND region != '' GROUP BY region ORDER BY avg_latency DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_bbd05fa6",
+    "type": "sql",
+    "content": {
+      "question": "延迟最高的10台设备",
+      "sql": "SELECT device_code, region, avg_latency_ms, packet_loss_rate FROM latency_reports WHERE report_date = (SELECT MAX(report_date) FROM latency_reports) ORDER BY avg_latency_ms DESC LIMIT 10"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_6aee33e3",
+    "type": "sql",
+    "content": {
+      "question": "通州区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '通州区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ab3f7e9c",
+    "type": "sql",
+    "content": {
+      "question": "西城区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '西城区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_38ac052a",
+    "type": "sql",
+    "content": {
+      "question": "东城区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '东城区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c3b5366c",
+    "type": "sql",
+    "content": {
+      "question": "丰台区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '丰台区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_2de20005",
+    "type": "sql",
+    "content": {
+      "question": "朝阳区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '朝阳区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_04230d8f",
+    "type": "sql",
+    "content": {
+      "question": "华为设备在线率",
+      "sql": "SELECT manufacturer_name,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate\n                FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name = '华为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_7a218781",
+    "type": "sql",
+    "content": {
+      "question": "大华设备在线率",
+      "sql": "SELECT manufacturer_name,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate\n                FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name = '大华'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_50ad236e",
+    "type": "sql",
+    "content": {
+      "question": "今天总共有多少台设备？",
+      "sql": "SELECT COUNT(*) as total FROM devices WHERE snapshot_date = '2026-06-16'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_566343af",
+    "type": "sql",
+    "content": {
+      "question": "昨天设备数量？",
+      "sql": "SELECT COUNT(*) as total FROM devices WHERE snapshot_date = date('2026-06-16', '-1 day')"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_8883b9d8",
+    "type": "sql",
+    "content": {
+      "question": "今天设备在线率是多少？",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f956524b",
+    "type": "sql",
+    "content": {
+      "question": "设备数量 TOP5 厂商",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' GROUP BY manufacturer_name ORDER BY count DESC LIMIT 5"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ee9f0075",
+    "type": "sql",
+    "content": {
+      "question": "各设备类型数量",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_33b60c16",
+    "type": "sql",
+    "content": {
+      "question": "最近 7 天设备数量变化趋势",
+      "sql": "SELECT snapshot_date, COUNT(*) as count FROM devices GROUP BY snapshot_date ORDER BY snapshot_date"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f00d6a88",
+    "type": "sql",
+    "content": {
+      "question": "最近 7 天在线率趋势",
+      "sql": "SELECT snapshot_date, ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices GROUP BY snapshot_date ORDER BY snapshot_date"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_6cc6bb8e",
+    "type": "sql",
+    "content": {
+      "question": "列出所有异常设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, region, location, ip_address FROM devices WHERE snapshot_date = '2026-06-16' AND status = '异常' LIMIT 100"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_3a248c0f",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区有多少台设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_de363cb6",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区在线率多少？",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_6e586b15",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区在线设备数",
+      "sql": "SELECT COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a774e9d1",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区离线设备数",
+      "sql": "SELECT COUNT(*) as offline_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND status = '离线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c142e682",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区各状态设备数量",
+      "sql": "SELECT status, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' GROUP BY status"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_b4992110",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区各厂商设备分布",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' GROUP BY manufacturer_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_bd2dd4bf",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区各设备类型数量",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_0564e2d7",
+    "type": "sql",
+    "content": {
+      "question": "列出梁溪区所有离线设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, location, ip_address FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND status = '离线' LIMIT 100"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_25f85747",
+    "type": "sql",
+    "content": {
+      "question": "锡山区有多少台设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c82eae8d",
+    "type": "sql",
+    "content": {
+      "question": "锡山区在线率多少？",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_94eefe39",
+    "type": "sql",
+    "content": {
+      "question": "锡山区在线设备数",
+      "sql": "SELECT COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_2e9f8d63",
+    "type": "sql",
+    "content": {
+      "question": "锡山区离线设备数",
+      "sql": "SELECT COUNT(*) as offline_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND status = '离线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f783e84c",
+    "type": "sql",
+    "content": {
+      "question": "锡山区各状态设备数量",
+      "sql": "SELECT status, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' GROUP BY status"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_db66ffbd",
+    "type": "sql",
+    "content": {
+      "question": "锡山区各厂商设备分布",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' GROUP BY manufacturer_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_0adb64df",
+    "type": "sql",
+    "content": {
+      "question": "锡山区各设备类型数量",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_08b8f6a7",
+    "type": "sql",
+    "content": {
+      "question": "列出锡山区所有离线设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, location, ip_address FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND status = '离线' LIMIT 100"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_4859002c",
+    "type": "sql",
+    "content": {
+      "question": "惠山区有多少台设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_abc651ee",
+    "type": "sql",
+    "content": {
+      "question": "惠山区在线率多少？",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c8a947b9",
+    "type": "sql",
+    "content": {
+      "question": "惠山区在线设备数",
+      "sql": "SELECT COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_15df8a69",
+    "type": "sql",
+    "content": {
+      "question": "惠山区离线设备数",
+      "sql": "SELECT COUNT(*) as offline_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND status = '离线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_318d9fbb",
+    "type": "sql",
+    "content": {
+      "question": "惠山区各状态设备数量",
+      "sql": "SELECT status, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' GROUP BY status"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_98747802",
+    "type": "sql",
+    "content": {
+      "question": "惠山区各厂商设备分布",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' GROUP BY manufacturer_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9927f16e",
+    "type": "sql",
+    "content": {
+      "question": "惠山区各设备类型数量",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_91ca2cc6",
+    "type": "sql",
+    "content": {
+      "question": "列出惠山区所有离线设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, location, ip_address FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND status = '离线' LIMIT 100"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f76277fe",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区在线率多少？",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_1357d9f9",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区在线设备数",
+      "sql": "SELECT COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_43b935fd",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区离线设备数",
+      "sql": "SELECT COUNT(*) as offline_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND status = '离线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_10e3b3d5",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区各状态设备数量",
+      "sql": "SELECT status, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' GROUP BY status"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_8b61038e",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区各厂商设备分布",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' GROUP BY manufacturer_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ac35767f",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区各设备类型数量",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_56299e1f",
+    "type": "sql",
+    "content": {
+      "question": "列出滨湖区所有离线设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, location, ip_address FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND status = '离线' LIMIT 100"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_deca3628",
+    "type": "sql",
+    "content": {
+      "question": "新吴区有多少台设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a1c4be10",
+    "type": "sql",
+    "content": {
+      "question": "新吴区在线率多少？",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_3e0513a1",
+    "type": "sql",
+    "content": {
+      "question": "新吴区在线设备数",
+      "sql": "SELECT COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_4a75dfc1",
+    "type": "sql",
+    "content": {
+      "question": "新吴区离线设备数",
+      "sql": "SELECT COUNT(*) as offline_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND status = '离线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_7c7fc297",
+    "type": "sql",
+    "content": {
+      "question": "新吴区各状态设备数量",
+      "sql": "SELECT status, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' GROUP BY status"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_5a460c19",
+    "type": "sql",
+    "content": {
+      "question": "新吴区各厂商设备分布",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' GROUP BY manufacturer_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_5754763b",
+    "type": "sql",
+    "content": {
+      "question": "新吴区各设备类型数量",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_2da999da",
+    "type": "sql",
+    "content": {
+      "question": "列出新吴区所有离线设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, location, ip_address FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND status = '离线' LIMIT 100"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_43b00560",
+    "type": "sql",
+    "content": {
+      "question": "经开区有多少台设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_72c03b12",
+    "type": "sql",
+    "content": {
+      "question": "经开区在线率多少？",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_87d89425",
+    "type": "sql",
+    "content": {
+      "question": "经开区在线设备数",
+      "sql": "SELECT COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_5bec3dc5",
+    "type": "sql",
+    "content": {
+      "question": "经开区离线设备数",
+      "sql": "SELECT COUNT(*) as offline_count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND status = '离线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f7dfee3e",
+    "type": "sql",
+    "content": {
+      "question": "经开区各状态设备数量",
+      "sql": "SELECT status, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' GROUP BY status"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_2061374b",
+    "type": "sql",
+    "content": {
+      "question": "经开区各厂商设备分布",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' GROUP BY manufacturer_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_3747ff07",
+    "type": "sql",
+    "content": {
+      "question": "经开区各设备类型数量",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a3f4ae1b",
+    "type": "sql",
+    "content": {
+      "question": "列出经开区所有离线设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, location, ip_address FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND status = '离线' LIMIT 100"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a5ba70a9",
+    "type": "sql",
+    "content": {
+      "question": "无锡各区设备数量对比",
+      "sql": "SELECT region, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region IN ('梁溪区', '锡山区', '惠山区', '滨湖区', '新吴区', '经开区') GROUP BY region ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_b66677c3",
+    "type": "sql",
+    "content": {
+      "question": "无锡各区在线率对比",
+      "sql": "SELECT region, ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region IN ('梁溪区', '锡山区', '惠山区', '滨湖区', '新吴区', '经开区') GROUP BY region ORDER BY online_rate DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_fa50b3d4",
+    "type": "sql",
+    "content": {
+      "question": "无锡各区在线设备数对比",
+      "sql": "SELECT region, COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND region IN ('梁溪区', '锡山区', '惠山区', '滨湖区', '新吴区', '经开区') AND status = '在线' GROUP BY region ORDER BY online_count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_81d0f4a4",
+    "type": "sql",
+    "content": {
+      "question": "无锡各区离线设备数对比",
+      "sql": "SELECT region, COUNT(*) as offline_count FROM devices WHERE snapshot_date = '2026-06-16' AND region IN ('梁溪区', '锡山区', '惠山区', '滨湖区', '新吴区', '经开区') AND status = '离线' GROUP BY region ORDER BY offline_count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_38a39888",
+    "type": "sql",
+    "content": {
+      "question": "无锡各区异常设备数对比",
+      "sql": "SELECT region, COUNT(*) as abnormal_count FROM devices WHERE snapshot_date = '2026-06-16' AND region IN ('梁溪区', '锡山区', '惠山区', '滨湖区', '新吴区', '经开区') AND status = '异常' GROUP BY region"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9edc02bd",
+    "type": "sql",
+    "content": {
+      "question": "无锡各区厂商分布",
+      "sql": "SELECT region, manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region IN ('梁溪区', '锡山区', '惠山区', '滨湖区', '新吴区', '经开区') GROUP BY region, manufacturer_name ORDER BY region, count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_899f6e65",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区移动设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a7e0cdd9",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区移动设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_1563e832",
+    "type": "sql",
+    "content": {
+      "question": "锡山区移动设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c7535c19",
+    "type": "sql",
+    "content": {
+      "question": "锡山区移动设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_0e1f963a",
+    "type": "sql",
+    "content": {
+      "question": "惠山区移动设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_252876f2",
+    "type": "sql",
+    "content": {
+      "question": "惠山区移动设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_6663ba20",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区移动设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a03a15c3",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区移动设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_49a522aa",
+    "type": "sql",
+    "content": {
+      "question": "新吴区移动设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_2f385335",
+    "type": "sql",
+    "content": {
+      "question": "新吴区移动设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c66f85b2",
+    "type": "sql",
+    "content": {
+      "question": "经开区移动设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a7a3fb29",
+    "type": "sql",
+    "content": {
+      "question": "经开区移动设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_550ea87d",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区海康设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_cacd0898",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区海康设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_53e373ce",
+    "type": "sql",
+    "content": {
+      "question": "锡山区海康设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_0feef43a",
+    "type": "sql",
+    "content": {
+      "question": "锡山区海康设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_4f21363b",
+    "type": "sql",
+    "content": {
+      "question": "惠山区海康设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_64059583",
+    "type": "sql",
+    "content": {
+      "question": "惠山区海康设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_7464251f",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区海康设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_70c77031",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区海康设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f37d92eb",
+    "type": "sql",
+    "content": {
+      "question": "新吴区海康设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ebf1afaf",
+    "type": "sql",
+    "content": {
+      "question": "新吴区海康设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ec4e9e2c",
+    "type": "sql",
+    "content": {
+      "question": "经开区海康设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_2291722f",
+    "type": "sql",
+    "content": {
+      "question": "经开区海康设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_33327b44",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区中信科设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f295e0d0",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区中信科设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_26ee911f",
+    "type": "sql",
+    "content": {
+      "question": "锡山区中信科设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_77a99be9",
+    "type": "sql",
+    "content": {
+      "question": "锡山区中信科设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_12474918",
+    "type": "sql",
+    "content": {
+      "question": "惠山区中信科设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ff60eed3",
+    "type": "sql",
+    "content": {
+      "question": "惠山区中信科设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_45e064d1",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区中信科设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ed89cbda",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区中信科设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_65abdd1b",
+    "type": "sql",
+    "content": {
+      "question": "新吴区中信科设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c160b3a9",
+    "type": "sql",
+    "content": {
+      "question": "新吴区中信科设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a6d0dd80",
+    "type": "sql",
+    "content": {
+      "question": "经开区中信科设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_168caf73",
+    "type": "sql",
+    "content": {
+      "question": "经开区中信科设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_7f379b90",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区航天大为设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_87e91316",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区航天大为设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_2811e1a6",
+    "type": "sql",
+    "content": {
+      "question": "锡山区航天大为设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_91d34fa4",
+    "type": "sql",
+    "content": {
+      "question": "锡山区航天大为设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_b32b27e3",
+    "type": "sql",
+    "content": {
+      "question": "惠山区航天大为设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f08d543f",
+    "type": "sql",
+    "content": {
+      "question": "惠山区航天大为设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_691d47b0",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区航天大为设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_5775d83e",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区航天大为设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f1177cf8",
+    "type": "sql",
+    "content": {
+      "question": "新吴区航天大为设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9e08c878",
+    "type": "sql",
+    "content": {
+      "question": "新吴区航天大为设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_5358bb7f",
+    "type": "sql",
+    "content": {
+      "question": "经开区航天大为设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_78761782",
+    "type": "sql",
+    "content": {
+      "question": "经开区航天大为设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '航天大为'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_6f76b3a6",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区天安设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_706a1d90",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区天安设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_d9c2036d",
+    "type": "sql",
+    "content": {
+      "question": "锡山区天安设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_29e91cf5",
+    "type": "sql",
+    "content": {
+      "question": "锡山区天安设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_b8931025",
+    "type": "sql",
+    "content": {
+      "question": "惠山区天安设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_d94c6203",
+    "type": "sql",
+    "content": {
+      "question": "惠山区天安设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a331cfde",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区天安设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_5a761e92",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区天安设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_54d868e8",
+    "type": "sql",
+    "content": {
+      "question": "新吴区天安设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_dbe398d8",
+    "type": "sql",
+    "content": {
+      "question": "新吴区天安设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_e05a58a0",
+    "type": "sql",
+    "content": {
+      "question": "经开区天安设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ed31fd47",
+    "type": "sql",
+    "content": {
+      "question": "经开区天安设备在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区' AND manufacturer_name = '天安'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_bd84f9f6",
+    "type": "sql",
+    "content": {
+      "question": "各路口级别设备数量",
+      "sql": "SELECT junction_level, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' GROUP BY junction_level"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_5323f489",
+    "type": "sql",
+    "content": {
+      "question": "无锡各区路口数",
+      "sql": "SELECT region, COUNT(DISTINCT junction_id) as junction_count FROM devices WHERE snapshot_date = '2026-06-16' AND region IN ('梁溪区', '锡山区', '惠山区', '滨湖区', '新吴区', '经开区') GROUP BY region ORDER BY junction_count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_f006ceee",
+    "type": "sql",
+    "content": {
+      "question": "R1 路口设备数",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND junction_level = 'R1'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_e96461c6",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_bd0a8e5f",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_141f1ccd",
+    "type": "sql",
+    "content": {
+      "question": "新吴区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_d58737ce",
+    "type": "sql",
+    "content": {
+      "question": "移动设备在线率",
+      "sql": "SELECT manufacturer_name,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate\n                FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name = '移动'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_57ff1a92",
+    "type": "sql",
+    "content": {
+      "question": "中信科设备在线率",
+      "sql": "SELECT manufacturer_name,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate\n                FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name = '中信科'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_28882bcc",
+    "type": "sql",
+    "content": {
+      "question": "海康设备在线率",
+      "sql": "SELECT manufacturer_name,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate\n                FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ecf69d17",
+    "type": "sql",
+    "content": {
+      "question": "设备总数是多少？",
+      "sql": "SELECT COUNT(*) as total FROM devices WHERE snapshot_date = '2026-06-16'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_b6b85d07",
+    "type": "sql",
+    "content": {
+      "question": "总共有多少台设备？",
+      "sql": "SELECT COUNT(*) as total FROM devices WHERE snapshot_date = '2026-06-16'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ef68d715",
+    "type": "sql",
+    "content": {
+      "question": "设备总量统计",
+      "sql": "SELECT COUNT(*) as total FROM devices WHERE snapshot_date = '2026-06-16'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_980b7005",
+    "type": "sql",
+    "content": {
+      "question": "一共有多少设备",
+      "sql": "SELECT COUNT(*) as total FROM devices WHERE snapshot_date = '2026-06-16'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_62b373f3",
+    "type": "sql",
+    "content": {
+      "question": "设备状态分布",
+      "sql": "SELECT status, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' GROUP BY status ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_22cbd8b6",
+    "type": "sql",
+    "content": {
+      "question": "各状态设备数量",
+      "sql": "SELECT status, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' GROUP BY status ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_1d16648e",
+    "type": "sql",
+    "content": {
+      "question": "在线设备有多少？",
+      "sql": "SELECT COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_16df099e",
+    "type": "sql",
+    "content": {
+      "question": "在线设备数量",
+      "sql": "SELECT COUNT(*) as online_count FROM devices WHERE snapshot_date = '2026-06-16' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_bd6b3ca3",
+    "type": "sql",
+    "content": {
+      "question": "离线设备有多少？",
+      "sql": "SELECT COUNT(*) as offline_count FROM devices WHERE snapshot_date = '2026-06-16' AND status = '离线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_8031032d",
+    "type": "sql",
+    "content": {
+      "question": "列出所有离线设备",
+      "sql": "SELECT device_code, product_name, manufacturer_name, region, location FROM devices WHERE snapshot_date = '2026-06-16' AND status = '离线' ORDER BY region"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_b1a27448",
+    "type": "sql",
+    "content": {
+      "question": "离线设备列表",
+      "sql": "SELECT device_code, product_name, manufacturer_name, region, location FROM devices WHERE snapshot_date = '2026-06-16' AND status = '离线' ORDER BY region"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9eccd056",
+    "type": "sql",
+    "content": {
+      "question": "异常设备有多少？",
+      "sql": "SELECT COUNT(*) as abnormal_count FROM devices WHERE snapshot_date = '2026-06-16' AND status = '异常'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_fd9e2cd5",
+    "type": "sql",
+    "content": {
+      "question": "异常设备列表",
+      "sql": "SELECT device_code, product_name, manufacturer_name, region, location FROM devices WHERE snapshot_date = '2026-06-16' AND status = '异常' ORDER BY region"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a4ff0d0e",
+    "type": "sql",
+    "content": {
+      "question": "设备在线率是多少？",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate, COUNT(*) as total FROM devices WHERE snapshot_date = '2026-06-16'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_d42ed11e",
+    "type": "sql",
+    "content": {
+      "question": "整体在线率",
+      "sql": "SELECT ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate, COUNT(*) as total FROM devices WHERE snapshot_date = '2026-06-16'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_23108d6e",
+    "type": "sql",
+    "content": {
+      "question": "各区域设备数量对比",
+      "sql": "SELECT region, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region IS NOT NULL AND region != '' GROUP BY region ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_0aba8f1f",
+    "type": "sql",
+    "content": {
+      "question": "各区域设备数量",
+      "sql": "SELECT region, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region IS NOT NULL AND region != '' GROUP BY region ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_31adec6f",
+    "type": "sql",
+    "content": {
+      "question": "按区域统计设备数",
+      "sql": "SELECT region, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region IS NOT NULL AND region != '' GROUP BY region ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_35e44e41",
+    "type": "sql",
+    "content": {
+      "question": "锡山区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ba76aefe",
+    "type": "sql",
+    "content": {
+      "question": "惠山区设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_04cbb64e",
+    "type": "sql",
+    "content": {
+      "question": "滨湖区有多少台设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '滨湖区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a53dc21f",
+    "type": "sql",
+    "content": {
+      "question": "梁溪区设备统计",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '梁溪区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_6dcb8e4e",
+    "type": "sql",
+    "content": {
+      "question": "新吴区设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '新吴区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_26ea251d",
+    "type": "sql",
+    "content": {
+      "question": "经开区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '经开区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_cd87acff",
+    "type": "sql",
+    "content": {
+      "question": "各区域设备在线率",
+      "sql": "SELECT region,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate,\n                COUNT(*) as total,\n                SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) as online_count\n                FROM devices WHERE snapshot_date = '2026-06-16' AND region IS NOT NULL AND region != ''\n                GROUP BY region ORDER BY online_rate DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_d7bd1c43",
+    "type": "sql",
+    "content": {
+      "question": "哪个区域设备最多？",
+      "sql": "SELECT region, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region IS NOT NULL AND region != '' GROUP BY region ORDER BY count DESC LIMIT 1"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a9044fef",
+    "type": "sql",
+    "content": {
+      "question": "哪个区域在线率最高？",
+      "sql": "SELECT region,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate\n                FROM devices WHERE snapshot_date = '2026-06-16' AND region IS NOT NULL AND region != ''\n                GROUP BY region ORDER BY online_rate DESC LIMIT 1"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c0a24b0c",
+    "type": "sql",
+    "content": {
+      "question": "各厂商设备数量",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name IS NOT NULL AND manufacturer_name != '' GROUP BY manufacturer_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ff92ea60",
+    "type": "sql",
+    "content": {
+      "question": "厂商设备数量对比",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name IS NOT NULL AND manufacturer_name != '' GROUP BY manufacturer_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9287969a",
+    "type": "sql",
+    "content": {
+      "question": "各厂商设备数量TOP5",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name IS NOT NULL AND manufacturer_name != '' GROUP BY manufacturer_name ORDER BY count DESC LIMIT 5"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_7ed317c2",
+    "type": "sql",
+    "content": {
+      "question": "厂商TOP5",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name IS NOT NULL AND manufacturer_name != '' GROUP BY manufacturer_name ORDER BY count DESC LIMIT 5"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_2519b8b8",
+    "type": "sql",
+    "content": {
+      "question": "海康设备有多少？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_292b7ce0",
+    "type": "sql",
+    "content": {
+      "question": "海康威视设备在线率",
+      "sql": "SELECT manufacturer_name,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate,\n                COUNT(*) as total\n                FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name = '海康'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_caf3541e",
+    "type": "sql",
+    "content": {
+      "question": "大华设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name LIKE '%大华%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a092f820",
+    "type": "sql",
+    "content": {
+      "question": "宇视设备在线率",
+      "sql": "SELECT manufacturer_name,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate\n                FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name LIKE '%宇视%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_899452b2",
+    "type": "sql",
+    "content": {
+      "question": "哪个厂商设备最多？",
+      "sql": "SELECT manufacturer_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name IS NOT NULL AND manufacturer_name != '' GROUP BY manufacturer_name ORDER BY count DESC LIMIT 1"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_c76b9b27",
+    "type": "sql",
+    "content": {
+      "question": "设备类型分布",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND device_type_name IS NOT NULL AND device_type_name != '' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_b03e2571",
+    "type": "sql",
+    "content": {
+      "question": "各类型设备数量",
+      "sql": "SELECT device_type_name, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND device_type_name IS NOT NULL AND device_type_name != '' GROUP BY device_type_name ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9791ded4",
+    "type": "sql",
+    "content": {
+      "question": "摄像头有多少台？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND device_type_name LIKE '%摄像头%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_6bd4ae99",
+    "type": "sql",
+    "content": {
+      "question": "MEC设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND device_type_name = 'MEC'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_09d222f3",
+    "type": "sql",
+    "content": {
+      "question": "RSU设备有多少？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND device_type_name = 'RSU'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_8e0424f0",
+    "type": "sql",
+    "content": {
+      "question": "雷达设备数量",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND device_type_name LIKE '%雷达%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_efbcc81e",
+    "type": "sql",
+    "content": {
+      "question": "维护单位有哪些？",
+      "sql": "SELECT DISTINCT maintenance_unit FROM devices WHERE snapshot_date = '2026-06-16' AND maintenance_unit IS NOT NULL AND maintenance_unit != '' ORDER BY maintenance_unit"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9a77766d",
+    "type": "sql",
+    "content": {
+      "question": "各维护单位设备数量",
+      "sql": "SELECT maintenance_unit, COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND maintenance_unit IS NOT NULL AND maintenance_unit != '' GROUP BY maintenance_unit ORDER BY count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9af75a0f",
+    "type": "sql",
+    "content": {
+      "question": "海康维护的设备有多少？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND maintenance_unit LIKE '%海康%'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_d9c6165d",
+    "type": "sql",
+    "content": {
+      "question": "最近7天设备总数变化趋势",
+      "sql": "SELECT snapshot_date, COUNT(*) as total_count\n                FROM devices\n                WHERE snapshot_date >= date('2026-06-16', '-6 days')\n                GROUP BY snapshot_date ORDER BY snapshot_date"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ecd0f796",
+    "type": "sql",
+    "content": {
+      "question": "最近30天设备数量变化",
+      "sql": "SELECT snapshot_date, COUNT(*) as total_count\n                FROM devices\n                WHERE snapshot_date >= date('2026-06-16', '-29 days')\n                GROUP BY snapshot_date ORDER BY snapshot_date"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_17fa977c",
+    "type": "sql",
+    "content": {
+      "question": "每天设备在线率趋势",
+      "sql": "SELECT snapshot_date,\n                ROUND(SUM(CASE WHEN status='在线' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as online_rate,\n                COUNT(*) as total\n                FROM devices\n                WHERE snapshot_date >= date('2026-06-16', '-6 days')\n                GROUP BY snapshot_date ORDER BY snapshot_date"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_6bf8060a",
+    "type": "sql",
+    "content": {
+      "question": "近7天离线设备数量变化",
+      "sql": "SELECT snapshot_date, COUNT(*) as offline_count\n                FROM devices\n                WHERE status = '离线' AND snapshot_date >= date('2026-06-16', '-6 days')\n                GROUP BY snapshot_date ORDER BY snapshot_date"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_9603cbdd",
+    "type": "sql",
+    "content": {
+      "question": "网络延迟统计",
+      "sql": "SELECT ROUND(AVG(avg_latency_ms), 2) as avg_latency, ROUND(AVG(packet_loss_rate), 2) as avg_packet_loss FROM latency_reports"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_d3041319",
+    "type": "sql",
+    "content": {
+      "question": "平均延迟是多少？",
+      "sql": "SELECT ROUND(AVG(avg_latency_ms), 2) as avg_latency_ms FROM latency_reports"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_a3ab1bf1",
+    "type": "sql",
+    "content": {
+      "question": "丢包率统计",
+      "sql": "SELECT ROUND(AVG(packet_loss_rate), 2) as avg_packet_loss_rate, MAX(packet_loss_rate) as max_packet_loss_rate FROM latency_reports"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_1c23d720",
+    "type": "sql",
+    "content": {
+      "question": "各区域网络延迟对比",
+      "sql": "SELECT region, ROUND(AVG(avg_latency_ms), 2) as avg_latency, ROUND(AVG(packet_loss_rate), 2) as avg_loss FROM latency_reports WHERE region IS NOT NULL GROUP BY region ORDER BY avg_latency"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_8077cc34",
+    "type": "sql",
+    "content": {
+      "question": "延迟最高的设备",
+      "sql": "SELECT device_code, device_name, region, max_latency_ms, packet_loss_rate FROM latency_reports ORDER BY max_latency_ms DESC LIMIT 10"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_ed838016",
+    "type": "sql",
+    "content": {
+      "question": "锡山区在线设备有多少？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND region = '锡山区' AND status = '在线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_13500865",
+    "type": "sql",
+    "content": {
+      "question": "惠山区离线设备列表",
+      "sql": "SELECT device_code, product_name, manufacturer_name, location FROM devices WHERE snapshot_date = '2026-06-16' AND region = '惠山区' AND status = '离线'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_17870b44",
+    "type": "sql",
+    "content": {
+      "question": "海康在锡山区有多少设备？",
+      "sql": "SELECT COUNT(*) as count FROM devices WHERE snapshot_date = '2026-06-16' AND manufacturer_name = '海康' AND region = '锡山区'"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_22b755be",
+    "type": "sql",
+    "content": {
+      "question": "各区域各厂商设备数量",
+      "sql": "SELECT region, manufacturer_name, COUNT(*) as count\n                FROM devices WHERE snapshot_date = '2026-06-16'\n                AND region IS NOT NULL AND region != ''\n                AND manufacturer_name IS NOT NULL AND manufacturer_name != ''\n                GROUP BY region, manufacturer_name ORDER BY region, count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_39698b69",
+    "type": "sql",
+    "content": {
+      "question": "各区域各状态设备分布",
+      "sql": "SELECT region, status, COUNT(*) as count\n                FROM devices WHERE snapshot_date = '2026-06-16'\n                AND region IS NOT NULL AND region != ''\n                GROUP BY region, status ORDER BY region, count DESC"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_133ae8f8",
+    "type": "sql",
+    "content": {
+      "question": "设备详细信息",
+      "sql": "SELECT device_code, product_name, manufacturer_name, device_type_name, region, location, status, ip_address FROM devices WHERE snapshot_date = '2026-06-16' LIMIT 20"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_044bcacc",
+    "type": "sql",
+    "content": {
+      "question": "查看设备详情",
+      "sql": "SELECT * FROM devices WHERE snapshot_date = '2026-06-16' LIMIT 10"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  },
+  {
+    "id": "sql_8bdc78ad",
+    "type": "sql",
+    "content": {
+      "question": "设备IP地址列表",
+      "sql": "SELECT device_code, ip_address, region, status FROM devices WHERE snapshot_date = '2026-06-16' AND ip_address IS NOT NULL AND ip_address != '' LIMIT 50"
+    },
+    "metadata": {
+      "type": "sql"
+    }
+  }
+]
