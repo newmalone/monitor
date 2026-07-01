@@ -7,19 +7,20 @@ import * as XLSX from 'xlsx';
 import { fileURLToPath } from 'url';
 import { saveSnapshot, getSnapshot, getAllSnapshots, getSnapshotDevices, deleteSnapshot } from './db.js';
 import agentRouter from './agent/index.js';
-
+import authRouter from './routes/auth.js';
+import vannaRouter from './routes/vanna.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const app = express();
 const PORT = 3001;
-
 app.use(cors());
 app.use(express.json());
-
+// Auth API routes
+app.use('/api/auth', authRouter);
 // Agent API routes
 app.use(agentRouter);
-
+// Vanna AI API routes (proxy to Python service)
+app.use(vannaRouter);
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
@@ -31,28 +32,38 @@ const upload = multer({
   },
   limits: { fileSize: 50 * 1024 * 1024 },
 });
-
 app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: '请上传文件' });
     }
-
     const rawDate = String(req.body.date || '');
     const safeDate = rawDate.replace(/[\\/:*?"<>|]/g, '-') || formatDate(new Date());
+    // 处理文件名，确保正确编码
+    let fileName = req.file.originalname;
+    try {
+      if (Buffer.from(fileName, 'latin1').toString('utf8') !== fileName) {
+        fileName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+      }
+    } catch (e) {
+      console.log('文件名编码处理失败，使用原始名称');
+    }
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
-
     if (!sheetName) {
       return res.status(400).json({ error: 'Excel 文件没有可用工作表' });
     }
-
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
     const devices = parseDevices(jsonData);
-
-    await saveSnapshot(safeDate, req.file.originalname, devices);
-
+    await saveSnapshot(safeDate, fileName, devices);
+    console.log(`保存快照: 日期=${safeDate}, 文件=${fileName}, 设备数=${devices.length}`);
+    
+    // 数据双写：同时写入 SQLite（供Vanna使用）
+    writeToVannaSqlite(safeDate, fileName, devices).catch(err => {
+      console.error('写入Vanna SQLite失败（不影响主功能）:', err.message);
+    });
+    
     res.json({
       success: true,
       date: safeDate,
@@ -65,7 +76,6 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     res.status(500).json({ error: error.message || '上传处理失败' });
   }
 });
-
 app.get('/api/devices/:date', async (req, res) => {
   try {
     const { date } = req.params;
@@ -79,7 +89,6 @@ app.get('/api/devices/:date', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 app.get('/api/snapshots', async (req, res) => {
   try {
     const snapshots = await getAllSnapshots();
@@ -89,7 +98,6 @@ app.get('/api/snapshots', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 app.get('/api/snapshots/:date', async (req, res) => {
   try {
     const { date } = req.params;
@@ -103,7 +111,6 @@ app.get('/api/snapshots/:date', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 app.get('/api/snapshots/latest', async (req, res) => {
   try {
     const snapshots = await getAllSnapshots();
@@ -117,7 +124,6 @@ app.get('/api/snapshots/latest', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 app.delete('/api/snapshots/:date', async (req, res) => {
   try {
     const { date } = req.params;
@@ -128,7 +134,6 @@ app.delete('/api/snapshots/:date', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     return res.status(400).json({ error: error.message });
@@ -138,12 +143,10 @@ app.use((error, req, res, next) => {
   }
   next();
 });
-
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`设备监控后端服务已启动: http://0.0.0.0:${PORT}`);
   console.log(`局域网内可通过 http://${getLocalIP()}:${PORT} 访问`);
 });
-
 function getLocalIP() {
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {
@@ -155,14 +158,12 @@ function getLocalIP() {
   }
   return 'localhost';
 }
-
 function formatDate(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
-
 function parseDevices(jsonData) {
   return jsonData.map((row, index) => ({
     id: String(index + 1),
@@ -204,4 +205,57 @@ function parseDevices(jsonData) {
     trafficPoliceCode: String(row['设备编号(交警)'] || ''),
     enabled: row['启用状态'] === '未启用' ? '未启用' : '启用',
   }));
+}
+
+/**
+ * 数据双写：将设备数据同步写入 Vanna SQLite 数据库
+ * 如果 Vanna 服务不可用，不影响主功能
+ */
+async function writeToVannaSqlite(date, sourceFile, devices) {
+  const VANNA_SERVICE_URL = process.env.VANNA_SERVICE_URL || 'http://localhost:3002';
+  
+  try {
+    // 通过 Vanna 服务的迁移接口写入数据
+    const response = await fetch(`${VANNA_SERVICE_URL}/api/vanna/migrate/batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        date,
+        sourceFile,
+        devices: devices.map(d => ({
+          id: d.deviceCode || `dev_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          date,
+          device_code: d.deviceCode,
+          product_name: d.productName,
+          manufacturer_code: d.manufacturerCode,
+          manufacturer_name: d.manufacturerName,
+          device_type_code: d.deviceTypeCode,
+          device_type_name: d.deviceTypeName,
+          node_type: d.nodeType,
+          auth_method: d.authMethod,
+          location: d.location,
+          longitude: d.longitude,
+          latitude: d.latitude,
+          junction_id: d.junctionId,
+          junction_type: d.junctionType,
+          junction_level: d.junctionLevel,
+          region: d.region,
+          ip_address: d.ipAddress,
+          purpose: d.purpose,
+          owner_unit: d.ownerUnit,
+          maintenance_unit: d.maintenanceUnit,
+          status: d.status,
+          enabled: d.enabled,
+        })),
+      }),
+    });
+    
+    if (response.ok) {
+      console.log(`[Vanna Dual-Write] 成功写入 SQLite: ${date}, ${devices.length} 台设备`);
+    } else {
+      console.warn(`[Vanna Dual-Write] Vanna 服务返回 ${response.status}，可能未启动`);
+    }
+  } catch (error) {
+    console.warn(`[Vanna Dual-Write] Vanna 服务不可用（不影响主功能）: ${error.message}`);
+  }
 }
