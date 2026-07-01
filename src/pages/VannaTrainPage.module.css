@@ -1,0 +1,838 @@
+/* ============================================================
+ * Vanna 训练管理页面 - 千问风格
+ * 极简白色设计，清爽干净
+ * ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+.page {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background: #FFFFFF;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: #1F2329;
+}
+
+/* ==================== 左侧边栏 ==================== */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: #FBFCFD;
+  border-right: 1px solid #F0F2F5;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebarHeader {
+  padding: 16px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2329;
+}
+
+.logoIcon {
+  font-size: 20px;
+  color: #1664FF;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1F2329;
+  margin-bottom: 2px;
+  transition: all 0.15s ease;
+}
+
+.navItem:hover {
+  background: #F2F4F7;
+}
+
+.navItemActive {
+  background: #E8F0FF !important;
+  color: #1664FF;
+  font-weight: 500;
+}
+
+.navIcon {
+  font-size: 16px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebarFooter {
+  padding: 12px 16px;
+  border-top: 1px solid #F0F2F5;
+}
+
+.backBtn {
+  width: 100%;
+  height: 36px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #1F2329;
+  transition: all 0.15s ease;
+}
+
+.backBtn:hover {
+  background: #F7F8FA;
+  border-color: #D0D5DD;
+}
+
+/* ==================== 主内容区 ==================== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.topbar {
+  height: 52px;
+  min-height: 52px;
+  border-bottom: 1px solid #F0F2F5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: #FFFFFF;
+  flex-shrink: 0;
+}
+
+.topbarTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F2329;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbarStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.statusTagGreen {
+  background: #E8FFEA;
+  color: #00B42A;
+}
+
+.statusTagOrange {
+  background: #FFF7E8;
+  color: #FF7D00;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #FBFCFD;
+}
+
+.content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 3px;
+}
+
+.contentInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ==================== 统计卡片 ==================== */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  background: #FFFFFF;
+  border: 1px solid #F0F2F5;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border-color: #E5E7EB;
+}
+
+.statIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.statIconBlue {
+  background: #E8F0FF;
+  color: #1664FF;
+}
+
+.statIconGreen {
+  background: #E8FFEA;
+  color: #00B42A;
+}
+
+.statIconOrange {
+  background: #FFF7E8;
+  color: #FF7D00;
+}
+
+.statIconPurple {
+  background: #F0E8FF;
+  color: #722ED1;
+}
+
+.statBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #8F959E;
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1F2329;
+  line-height: 1.2;
+}
+
+.statValue span {
+  font-size: 13px;
+  font-weight: 400;
+  color: #8F959E;
+  margin-left: 4px;
+}
+
+/* ==================== 内容卡片 ==================== */
+.card {
+  background: #FFFFFF;
+  border: 1px solid #F0F2F5;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #F7F8FA;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F2329;
+}
+
+.cardTitleIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: #E8F0FF;
+  color: #1664FF;
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardBody {
+  padding: 20px;
+}
+
+/* ==================== 按钮 ==================== */
+.btn {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  color: #1F2329;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.btn:hover {
+  border-color: #D0D5DD;
+  background: #F7F8FA;
+}
+
+.btnPrimary {
+  background: #1664FF;
+  border-color: #1664FF;
+  color: #FFFFFF;
+}
+
+.btnPrimary:hover {
+  background: #0E52D9;
+  border-color: #0E52D9;
+}
+
+.btnDanger {
+  color: #F53F3F;
+  border-color: #FFECE8;
+  background: #FFFFFF;
+}
+
+.btnDanger:hover {
+  background: #FFF2F0;
+  border-color: #FFCCC7;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnSm {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+/* ==================== 表单 ==================== */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1F2329;
+}
+
+.formLabelRequired::before {
+  content: '*';
+  color: #F53F3F;
+  margin-right: 4px;
+}
+
+.formInput,
+.formTextarea,
+.formSelect {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1F2329;
+  background: #FFFFFF;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  outline: none;
+}
+
+.formInput:focus,
+.formTextarea:focus,
+.formSelect:focus {
+  border-color: #1664FF;
+  box-shadow: 0 0 0 2px rgba(22, 100, 255, 0.08);
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+.formMono {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.formHint {
+  font-size: 12px;
+  color: #8F959E;
+}
+
+.formActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ==================== 模板网格 ==================== */
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.templateCard {
+  border: 1px solid #F0F2F5;
+  border-radius: 8px;
+  padding: 14px;
+  background: #FAFBFC;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.templateCard:hover {
+  border-color: #1664FF;
+  background: #F0F6FF;
+}
+
+.templateName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F2329;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.templatePreview {
+  font-size: 11px;
+  color: #8F959E;
+  font-family: 'Consolas', monospace;
+  background: #FFFFFF;
+  padding: 8px 10px;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+  max-height: 60px;
+  overflow-y: auto;
+  margin: 0;
+}
+
+.templateBtn {
+  align-self: flex-start;
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  color: #1F2329;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.templateBtn:hover {
+  border-color: #1664FF;
+  color: #1664FF;
+}
+
+/* ==================== 表格 ==================== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  background: #FAFBFC;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #1F2329;
+  border-bottom: 1px solid #F0F2F5;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #F7F8FA;
+  color: #1F2329;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: #FAFBFC;
+}
+
+.tableActions {
+  display: flex;
+  gap: 4px;
+}
+
+.tableToolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ==================== 标签 ==================== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.tagBlue {
+  background: #E8F0FF;
+  color: #1664FF;
+}
+
+.tagGreen {
+  background: #E8FFEA;
+  color: #00B42A;
+}
+
+.tagOrange {
+  background: #FFF7E8;
+  color: #FF7D00;
+}
+
+/* ==================== 历史列表 ==================== */
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #FAFBFC;
+  border-radius: 6px;
+  border: 1px solid #F0F2F5;
+}
+
+.historyStatus {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.historyStatusSuccess {
+  background: #E8FFEA;
+  color: #00B42A;
+}
+
+.historyStatusError {
+  background: #FFECE8;
+  color: #F53F3F;
+}
+
+.historyTime {
+  flex: 1;
+  font-size: 13px;
+  color: #1F2329;
+}
+
+.historyStats {
+  display: flex;
+  gap: 16px;
+}
+
+.historyStat {
+  font-size: 12px;
+  color: #8F959E;
+}
+
+.historyStat strong {
+  color: #1F2329;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.historyTotal {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1664FF;
+}
+
+/* ==================== 基准测试卡片 ==================== */
+.benchGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.benchCard {
+  text-align: center;
+  padding: 20px;
+  border-radius: 8px;
+  background: #FAFBFC;
+  border: 1px solid #F0F2F5;
+}
+
+.benchLabel {
+  font-size: 13px;
+  color: #8F959E;
+  margin-bottom: 8px;
+}
+
+.benchValue {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.benchValue span {
+  font-size: 16px;
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+.benchCardBefore .benchValue {
+  color: #FF7D00;
+}
+
+.benchCardAfter .benchValue {
+  color: #00B42A;
+}
+
+.benchCardImprove .benchValue {
+  color: #1664FF;
+}
+
+/* ==================== 空状态 ==================== */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #8F959E;
+  font-size: 13px;
+}
+
+/* ==================== 分页区 ==================== */
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 0 0;
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 1200px) {
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 64px;
+    min-width: 64px;
+  }
+
+  .sidebarHeader {
+    padding: 16px 0 12px;
+    justify-content: center;
+  }
+
+  .logo {
+    justify-content: center;
+  }
+
+  .logo span:last-child {
+    display: none;
+  }
+
+  .sidebarNav {
+    padding: 8px 6px;
+  }
+
+  .navItem {
+    justify-content: center;
+    padding: 10px 0;
+    gap: 0;
+  }
+
+  .navItem > span:not(.navIcon) {
+    display: none;
+  }
+
+  .navIcon {
+    margin: 0;
+    font-size: 18px;
+    width: 24px;
+  }
+
+  .sidebarFooter {
+    padding: 12px 8px;
+  }
+
+  .backBtn {
+    padding: 0;
+    gap: 0;
+  }
+
+  .backBtn > span:not(.navIcon) {
+    display: none;
+  }
+
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .benchGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .topbar {
+    padding: 0 16px;
+  }
+
+  .contentInner {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    display: none;
+  }
+
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==================== 描述文本 ==================== */
+.desc {
+  font-size: 13px;
+  color: #8F959E;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+/* ==================== JSON生成结果 ==================== */
+.jsonResult {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #E8FFEA;
+  color: #00B42A;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.jsonResult strong {
+  font-weight: 600;
+}
+
+/* ==================== 加载 ==================== */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #8F959E;
+  font-size: 13px;
+  gap: 8px;
+}
+
+/* ==================== 模态框内容 ==================== */
+.modalBody {
+  padding: 4px 0;
+}
