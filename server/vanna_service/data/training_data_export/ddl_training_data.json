@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ddl_devices",
+    "type": "ddl",
+    "content": {
+      "ddl": "CREATE TABLE devices (\n                    id TEXT PRIMARY KEY,\n                    device_code TEXT NOT NULL,\n                    product_name TEXT,\n                    manufacturer_code TEXT,\n                    manufacturer_name TEXT,\n                    device_type_code TEXT,\n                    device_type_name TEXT,\n                    node_type TEXT,\n                    auth_method TEXT,\n                    username TEXT,\n                    password TEXT,\n                    protocol TEXT,\n                    serial_number TEXT,\n                    location TEXT,\n                    longitude REAL,\n                    latitude REAL,\n                    junction_id TEXT,\n                    junction_type TEXT,\n                    junction_level TEXT,\n                    region TEXT,\n                    related_junction TEXT,\n                    ip_address TEXT,\n                    purpose TEXT,\n                    owner_unit TEXT,\n                    maintenance_unit TEXT,\n                    status TEXT,\n                    install_location TEXT,\n                    junction_code TEXT,\n                    traffic_police_code TEXT,\n                    enabled TEXT,\n                    snapshot_date TEXT NOT NULL,\n                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n                , direction_angle TEXT, rotation_angle TEXT, camera_angle TEXT, camera_type TEXT, detection_direction TEXT, pitch_angle TEXT)"
+    },
+    "metadata": {
+      "type": "ddl"
+    }
+  },
+  {
+    "id": "ddl_snapshots",
+    "type": "ddl",
+    "content": {
+      "ddl": "CREATE TABLE snapshots (\n                    id INTEGER PRIMARY KEY AUTOINCREMENT,\n                    date TEXT NOT NULL UNIQUE,\n                    source_file TEXT,\n                    imported_at TEXT,\n                    total_count INTEGER DEFAULT 0,\n                    enabled_count INTEGER DEFAULT 0,\n                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n                )"
+    },
+    "metadata": {
+      "type": "ddl"
+    }
+  },
+  {
+    "id": "ddl_latency_reports",
+    "type": "ddl",
+    "content": {
+      "ddl": "CREATE TABLE latency_reports (\n                    id INTEGER PRIMARY KEY AUTOINCREMENT,\n                    device_code TEXT NOT NULL,\n                    device_name TEXT,\n                    region TEXT,\n                    report_date TEXT NOT NULL,\n                    avg_latency_ms REAL,\n                    max_latency_ms REAL,\n                    min_latency_ms REAL,\n                    packet_loss_rate REAL,\n                    total_checks INTEGER DEFAULT 0,\n                    online_count INTEGER DEFAULT 0,\n                    offline_count INTEGER DEFAULT 0,\n                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n                )"
+    },
+    "metadata": {
+      "type": "ddl"
+    }
+  },
+  {
+    "id": "ddl_conversations",
+    "type": "ddl",
+    "content": {
+      "ddl": "CREATE TABLE conversations (\n                    id TEXT PRIMARY KEY,\n                    user_id TEXT NOT NULL,\n                    title TEXT DEFAULT '新对话',\n                    created_at DATETIME NOT NULL,\n                    updated_at DATETIME NOT NULL,\n                    turn_count INTEGER DEFAULT 0\n                )"
+    },
+    "metadata": {
+      "type": "ddl"
+    }
+  },
+  {
+    "id": "ddl_messages",
+    "type": "ddl",
+    "content": {
+      "ddl": "CREATE TABLE messages (\n                    id INTEGER PRIMARY KEY AUTOINCREMENT,\n                    conversation_id TEXT NOT NULL,\n                    role TEXT NOT NULL,\n                    content TEXT,\n                    sql TEXT,\n                    result_data TEXT,\n                    timestamp DATETIME NOT NULL,\n                    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE\n                )"
+    },
+    "metadata": {
+      "type": "ddl"
+    }
+  }
+]
