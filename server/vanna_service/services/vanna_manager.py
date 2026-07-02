@@ -319,7 +319,13 @@ class VannaManager:
 
     # ========== 对外 API：问答 ==========
     def _match_sql_by_keyword(self, question: str) -> str:
-        """关键词匹配：从训练的 SQL 问答对中找到最匹配的 SQL (LLM fallback)"""
+        """关键词匹配：从训练的 SQL 问答对中找到最匹配的 SQL
+
+        策略（按优先级从高到低）：
+        1. 精确匹配：训练问题与用户问题完全相同或高度包含
+        2. 意图优先匹配：先识别用户意图（在线率/总数/离线等），再找对应SQL
+        3. 关键词评分匹配：综合评分找最佳匹配
+        """
         try:
             sql_pairs = self.vn.get_similar_question_sql(question)
         except Exception as e:
@@ -328,10 +334,108 @@ class VannaManager:
         if not sql_pairs:
             return None
 
-        # 策略 1: 精准子串匹配（问题中关键短语与训练问题完全匹配）
+        # ========== 策略 0: 精确匹配（最高优先级）==========
+        q_clean = question.strip().rstrip("？?。！!")
+        for pair in sql_pairs:
+            if not isinstance(pair, dict):
+                continue
+            pair_q = str(pair.get("question", "")).strip().rstrip("？?。！!")
+            if pair_q == q_clean:
+                logger.info(f"Exact match: {question[:50]}")
+                return pair.get("sql")
+            # 高度包含（互相包含且长度差异小）
+            if (pair_q in q_clean or q_clean in pair_q) and abs(len(pair_q) - len(q_clean)) <= 5:
+                logger.info(f"Near-exact match: {question[:50]}")
+                return pair.get("sql")
+
+        # ========== 策略 1: 意图优先匹配 ==========
+        # 先识别用户的核心意图，再在训练数据中找对应SQL
+        def _has(kws, text):
+            return any(k in text for k in kws)
+
+        # 意图关键词（按特异性从高到低排列，避免冲突）
+        intent_rules = [
+            # 高特异性意图（必须优先匹配）
+            (["在线率", "在线比例", "在线百分比"], "在线率", lambda q: "在线率" in q),
+            (["离线率", "离线比例"], "离线率", lambda q: "离线率" in q),
+            (["异常率", "故障率"], "异常率", lambda q: "异常率" in q),
+            (["离线设备", "离线列表", "离线设备列表", "所有离线"], "离线设备列表", lambda q: ("列出" in q or "列表" in q) and "离线" in q),
+            (["异常设备", "故障设备", "异常列表"], "异常设备列表", lambda q: ("列出" in q or "列表" in q) and ("异常" in q or "故障" in q)),
+            (["网络延迟", "平均延迟", "延迟统计", "丢包率"], "网络延迟", lambda q: ("延迟" in q or "丢包" in q)),
+            (["各区域设备数量对比", "区域设备数量对比", "各区设备数量"], "区域对比", lambda q: ("各区域" in q or "各区" in q) and ("对比" in q or "数量" in q)),
+            (["各区域设备在线率", "各区在线率", "区域在线率对比"], "区域在线率", lambda q: ("各区域" in q or "各区" in q or "区域" in q) and "在线率" in q),
+            (["各厂商设备数量", "厂商设备数量对比", "厂商数量"], "厂商数量", lambda q: ("各厂商" in q or "厂商" in q) and ("数量" in q or "对比" in q)),
+            (["各厂商设备在线率", "厂商在线率"], "厂商在线率", lambda q: ("各厂商" in q or "厂商" in q) and "在线率" in q),
+            (["设备类型", "类型分布", "各类型设备"], "设备类型", lambda q: ("类型" in q) and ("分布" in q or "数量" in q or "各" in q)),
+            (["状态分布", "各状态", "状态统计"], "状态分布", lambda q: "状态" in q and ("分布" in q or "统计" in q)),
+            (["趋势", "变化趋势", "最近.*天.*趋势", "每天.*趋势"], "趋势", lambda q: ("趋势" in q or "变化" in q)),
+            (["TOP5", "top5", "Top5", "最多.*厂商", "厂商最多"], "TOP5", lambda q: ("TOP5" in q or "top5" in q or "Top5" in q or "最多" in q)),
+            (["维护单位", "运维单位"], "维护单位", lambda q: "维护" in q or "运维" in q),
+            (["各区域各厂商", "区域厂商分布"], "区域厂商分布", lambda q: "区域" in q and "厂商" in q),
+            (["各区域.*状态", "区域.*分布"], "区域状态分布", lambda q: "区域" in q and "状态" in q),
+            # 中等特异性
+            (["在线设备", "在线数量", "在线多少"], "在线设备数", lambda q: "在线" in q and ("数量" in q or "多少" in q or "有" in q)),
+            (["离线数量", "离线多少", "离线设备有多少"], "离线设备数", lambda q: "离线" in q and ("数量" in q or "多少" in q or "有" in q)),
+            (["异常数量", "异常多少", "异常设备有多少"], "异常设备数", lambda q: ("异常" in q or "故障" in q) and ("数量" in q or "多少" in q)),
+            (["设备总数", "总共有多少", "一共多少", "一共有多少", "设备总量"], "设备总数", lambda q: ("总数" in q or "总共" in q or "一共" in q or "总量" in q)),
+            (["有多少台设备", "多少台设备", "设备数量"], "设备数量", lambda q: ("多少台" in q or "多少设备" in q or "设备数量" in q)),
+            # 区域查询（需要同时匹配区域名）
+            (["梁溪区", "锡山区", "惠山区", "滨湖区", "新吴区", "经开区"], "区域查询", lambda q: any(r in q for r in ["梁溪区", "锡山区", "惠山区", "滨湖区", "新吴区", "经开区"])),
+            # 厂商查询
+            (["海康", "海康威视", "大华", "宇视", "华为", "中兴", "移动", "中信科", "航天大为", "天安"], "厂商查询", lambda q: any(m in q for m in ["海康", "大华", "宇视", "华为", "中兴", "移动", "中信科", "航天大为", "天安"])),
+        ]
+
+        # 按意图规则匹配
+        for intent_kws, intent_name, intent_check in intent_rules:
+            if not intent_check(question):
+                continue
+            # 找到该意图下最匹配的训练问题
+            best_pair = None
+            best_score = 0
+            for pair in sql_pairs:
+                if not isinstance(pair, dict):
+                    continue
+                pair_q = str(pair.get("question", ""))
+                pair_sql = str(pair.get("sql", ""))
+                if not pair_sql:
+                    continue
+
+                score = 0
+                # 意图关键词匹配
+                for kw in intent_kws:
+                    if kw in question and kw in pair_q:
+                        score += 10
+                # 训练问题必须包含意图关键词
+                if any(kw in pair_q for kw in intent_kws):
+                    score += 5
+                # 字符重叠
+                for ch in question:
+                    if ch in pair_q and ch not in " ，。？的是了有在多少":
+                        score += 1
+                # 训练问题包含意图关键词且SQL也包含对应字段
+                if intent_name == "在线率" and "online_rate" in pair_sql:
+                    score += 20
+                if intent_name == "设备总数" and ("total" in pair_sql.lower() or "COUNT(*)" in pair_sql) and "online_rate" not in pair_sql:
+                    score += 15
+                if intent_name == "在线设备数" and "online_count" in pair_sql:
+                    score += 15
+                if intent_name == "离线设备数" and "offline_count" in pair_sql:
+                    score += 15
+                if intent_name == "异常设备数" and "abnormal_count" in pair_sql:
+                    score += 15
+
+                if score > best_score:
+                    best_score = score
+                    best_pair = pair
+
+            if best_pair and best_score >= 10:
+                logger.info(f"Intent match [{intent_name}]: {question[:50]}, score={best_score}")
+                return best_pair.get("sql")
+
+        # ========== 策略 2: 关键词评分兜底 ==========
         question_keywords = ["在线率", "离线设备", "异常设备", "设备总数", "设备数量", "各区域",
                              "各厂商", "状态分布", "网络延迟", "海康威视", "大华", "宇视",
-                             "海淀区", "朝阳区", "丰台区", "TOP5", "top5", "Top5",
+                             "TOP5", "top5", "Top5",
                              "最近", "变化趋势", "每天", "列出", "明细", "维护单位",
                              "在线", "离线", "异常", "总数", "区域", "厂商", "类型"]
 
@@ -346,70 +450,71 @@ class VannaManager:
                 continue
 
             score = 0
-            # 匹配关键词：同时出现在用户问题和训练问题中
             for kw in question_keywords:
                 if kw in question and kw in pair_question:
                     score += 5
-            # 中文字符重叠度（粗略）
             overlap = 0
             for ch in question:
                 if ch in pair_question and ch not in " ，。？的是了有":
                     overlap += 1
             score += overlap
-            # 完全匹配或包含问题的大比分
             if pair_question in question or question in pair_question:
                 score += 50
             if score > best_score:
                 best_score = score
                 best_pair = pair
 
-        if best_pair and best_score >= 3:
+        if best_pair and best_score >= 8:
             return best_pair.get("sql")
-
-        # 策略 2: 硬编码兜底匹配
-        def _has(kws, text):
-            return any(k in text for k in kws)
-
-        for pair in sql_pairs:
-            if not isinstance(pair, dict):
-                continue
-            pair_question = str(pair.get("question", ""))
-            pair_sql = str(pair.get("sql", ""))
-            if not pair_sql:
-                continue
-
-            if _has(["在线率", "在线比例"], question) and "在线率" in pair_question:
-                return pair_sql
-            if _has(["总数", "有多少", "多少台", "总计", "共多少"], question) and "总数" in pair_question:
-                return pair_sql
-            if _has(["各区域", "按区域", "区域对比"], question) and ("区域" in pair_question and "对比" in pair_question or "各区域" in pair_question):
-                return pair_sql
-            if _has(["TOP5", "top5", "Top5", "厂商最多", "哪个厂商"], question) and ("TOP5" in pair_question or "top5" in pair_question or "TOP" in pair_question):
-                return pair_sql
-            if _has(["列出", "列表", "明细"], question) and "离线" in question and "离线" in pair_question:
-                return pair_sql
-            if _has(["海康威视", "大华", "宇视"], question) and ("在线率" in pair_question or "设备" in pair_question):
-                return pair_sql
-            if _has(["异常", "故障"], question) and "异常" in pair_question:
-                return pair_sql
-            if _has(["延迟", "丢包", "网络质量"], question) and ("延迟" in pair_question or "网络" in pair_question):
-                return pair_sql
-            if _has(["维护单位", "运维单位"], question) and "维护单位" in pair_question:
-                return pair_sql
-            if _has(["状态分布", "各状态"], question) and "状态分布" in pair_question:
-                return pair_sql
-            if _has(["趋势", "变化", "最近", "近7天", "近30天", "每天"], question) and ("趋势" in pair_question or "每天" in pair_question):
-                return pair_sql
-            if _has(["区域各厂商", "各区域各厂商", "分布"], question) and "区域" in pair_question and "厂商" in pair_question:
-                return pair_sql
-            if _has(["设备类型", "类型分布", "什么类型"], question) and "类型" in pair_question:
-                return pair_sql
-            if _has(["朝阳区", "海淀区", "丰台区", "通州区", "大兴区", "东城区", "西城区", "昌平区"], question) and "设备" in pair_question:
-                return pair_sql
 
         return None
 
     # ========== SQL 执行安全包装 ==========
+    def _normalize_sql_date(self, sql: str) -> str:
+        """将 SQL 中的硬编码日期替换为动态日期
+
+        训练数据中的 SQL 可能包含固定日期（如 '2026-06-16'），
+        需要替换为最新快照日期或动态日期表达式。
+        """
+        if not sql:
+            return sql
+
+        import re
+
+        # 获取最新快照日期
+        try:
+            conn = self.db_connector.get_connection()
+            row = conn.execute("SELECT MAX(snapshot_date) as max_date FROM devices").fetchone()
+            latest_date = row["max_date"] if row else None
+            conn.close()
+        except Exception:
+            latest_date = None
+
+        if not latest_date:
+            return sql
+
+        # 替换硬编码的快照日期为最新日期
+        # 匹配 snapshot_date = 'YYYY-MM-DD' 格式
+        sql = re.sub(
+            r"snapshot_date\s*=\s*'(\d{4}-\d{2}-\d{2})'",
+            f"snapshot_date = '{latest_date}'",
+            sql
+        )
+        # 匹配 date('YYYY-MM-DD', ...) 格式
+        sql = re.sub(
+            r"date\('\d{4}-\d{2}-\d{2}'",
+            f"date('{latest_date}'",
+            sql
+        )
+        # 匹配 snapshot_date >= date('YYYY-MM-DD', ...) 中的日期
+        sql = re.sub(
+            r"snapshot_date\s*>=\s*date\('\d{4}-\d{2}-\d{2}'",
+            f"snapshot_date >= date('{latest_date}'",
+            sql
+        )
+
+        return sql
+
     def _safe_run_sql(self, sql: str) -> object:
         """安全执行 SQL，统一返回格式
         - 成功: list[dict]
@@ -423,6 +528,9 @@ class VannaManager:
         sql_upper = sql.strip().upper()
         if not sql_upper.startswith("SELECT") and not sql_upper.startswith("WITH"):
             return {"_error": "只允许 SELECT/WITH 语句", "_sql": sql}
+
+        # 动态替换硬编码日期
+        sql = self._normalize_sql_date(sql)
 
         try:
             result = self.vn.run_sql(sql)
